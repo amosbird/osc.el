@@ -32,6 +32,38 @@
   (interactive)
   (osc-navigate "down"))
 
+(defun i3-navigate (direction)
+  (let
+    ((cmd (concat "windmove-" direction)))
+    (condition-case nil
+      (funcall (intern cmd))
+      (error
+        (i3-command direction)))))
+
+(defun i3-command (direction)
+  (shell-command-to-string
+    (concat "i3-msg focus " direction)))
+
+;;;###autoload
+(defun i3-nav-left ()
+  (interactive)
+  (i3-navigate "left"))
+
+;;;###autoload
+(defun i3-nav-right ()
+  (interactive)
+  (i3-navigate "right"))
+
+;;;###autoload
+(defun i3-nav-up ()
+  (interactive)
+  (i3-navigate "up"))
+
+;;;###autoload
+(defun i3-nav-down ()
+  (interactive)
+  (i3-navigate "down"))
+
 ;;;###autoload
 (defun osc-select-text (string &optional replace yank-handler)
   (let ((b64-length (+ (* (length string) 3) 2)))
