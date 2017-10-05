@@ -1,3 +1,5 @@
+;;; osc.el --- Support for osc handlers
+
 (defun osc-navigate (direction)
   (let ((cmd (concat "windmove-" direction)))
     (condition-case nil
