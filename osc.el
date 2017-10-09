@@ -1,4 +1,7 @@
 ;;; osc.el --- Support for osc handlers
+;;; Commentary:
+;;; Code:
+(defvar osc-http-addr "172.26.165.60:8866")
 
 (defun osc-navigate (direction)
   (let ((cmd (concat "windmove-" direction)))
@@ -74,11 +77,14 @@
       (message "Selection too long to send to terminal %d" b64-length)
       (sit-for 2))))
 
+(require 'browse-url)
+
 ;;;###autoload
 (defun browse-url-osc (string &optional _new-window)
   (interactive (browse-url-interactive-arg "URL: "))
   (setq string (browse-url-encode-url string))
-  (let* ((osc-string (concat "\e]52;x;" (base64-encode-string (encode-coding-string string 'utf-8) t) "\07"))
+  (let* ((string (replace-regexp-in-string "^file://" (concat "http://" osc-http-addr) string))
+         (osc-string (concat "\e]52;x;" (base64-encode-string (encode-coding-string string 'utf-8) t) "\07"))
          (escaped (if (string-match "tmux" (concat "" (getenv "TMUX"))) (concat "\033Ptmux;\033" osc-string "\033\\") osc-string)))
     (send-string-to-terminal escaped)))
 
@@ -86,7 +92,8 @@
 (defun browse-url-osc-new (string &optional _new-window)
   (interactive (browse-url-interactive-arg "URL: "))
   (setq string (browse-url-encode-url string))
-  (let* ((osc-string (concat "\e]52;y;" (base64-encode-string (encode-coding-string string 'utf-8) t) "\07"))
+  (let* ((string (replace-regexp-in-string "^file://" (concat "http://" osc-http-addr) string))
+         (osc-string (concat "\e]52;y;" (base64-encode-string (encode-coding-string string 'utf-8) t) "\07"))
          (escaped (if (string-match "tmux" (concat "" (getenv "TMUX"))) (concat "\033Ptmux;\033" osc-string "\033\\") osc-string)))
     (send-string-to-terminal escaped)))
 
