@@ -71,7 +71,7 @@
 ;;;###autoload
 (defun osc-select-text (string &optional replace yank-handler)
   (if (display-graphic-p)
-      (gui-select-text string replace yank-handler)
+      (gui-select-text string)
     (let ((b64-length (+ (* (length string) 3) 2)))
       (if (<= b64-length 100000)
           (let* ((osc-string (concat "\e]52;c;" (base64-encode-string (encode-coding-string string 'utf-8) t) "\07"))
