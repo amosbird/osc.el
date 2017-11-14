@@ -1,4 +1,5 @@
 ;;; osc.el --- Support for osc handlers
+;; Package-Version: 20171009.2225
 ;;; Commentary:
 ;;; Code:
 (defvar osc-http-addr "172.26.165.60:8866")
@@ -69,32 +70,29 @@
 
 ;;;###autoload
 (defun osc-select-text (string &optional replace yank-handler)
-  (let ((b64-length (+ (* (length string) 3) 2)))
-    (if (<= b64-length 100000)
-        (let* ((osc-string (concat "\e]52;c;" (base64-encode-string (encode-coding-string string 'utf-8) t) "\07"))
-               (escaped (if (string-match "tmux" (concat "" (getenv "TMUX"))) (concat "\033Ptmux;\033" osc-string "\033\\") osc-string)))
-          (send-string-to-terminal escaped))
-      (message "Selection too long to send to terminal %d" b64-length)
-      (sit-for 2))))
+  (if (display-graphic-p)
+      (gui-select-text string replace yank-handler)
+    (let ((b64-length (+ (* (length string) 3) 2)))
+      (if (<= b64-length 100000)
+          (let* ((osc-string (concat "\e]52;c;" (base64-encode-string (encode-coding-string string 'utf-8) t) "\07"))
+                 (escaped (if (string-match "tmux" (concat "" (getenv "TMUX"))) (concat "\033Ptmux;\033" osc-string "\033\\") osc-string)))
+            (send-string-to-terminal escaped))
+        (message "Selection too long to send to terminal %d" b64-length)
+        (sit-for 2)))))
 
 (require 'browse-url)
 
 ;;;###autoload
-(defun browse-url-osc (string &optional _new-window)
+(defun browse-url-osc (url &optional _new-window)
   (interactive (browse-url-interactive-arg "URL: "))
-  (setq string (browse-url-encode-url string))
-  (let* ((string (replace-regexp-in-string "^file://" (concat "http://" osc-http-addr) string))
-         (osc-string (concat "\e]52;x;" (base64-encode-string (encode-coding-string string 'utf-8) t) "\07"))
-         (escaped (if (string-match "tmux" (concat "" (getenv "TMUX"))) (concat "\033Ptmux;\033" osc-string "\033\\") osc-string)))
-    (send-string-to-terminal escaped)))
-
-;;;###autoload
-(defun browse-url-osc-new (string &optional _new-window)
-  (interactive (browse-url-interactive-arg "URL: "))
-  (setq string (browse-url-encode-url string))
-  (let* ((string (replace-regexp-in-string "^file://" (concat "http://" osc-http-addr) string))
-         (osc-string (concat "\e]52;y;" (base64-encode-string (encode-coding-string string 'utf-8) t) "\07"))
-         (escaped (if (string-match "tmux" (concat "" (getenv "TMUX"))) (concat "\033Ptmux;\033" osc-string "\033\\") osc-string)))
-    (send-string-to-terminal escaped)))
+  (if (display-graphic-p)
+      (browse-url-chrome url _new-window)
+    (setq url (browse-url-encode-url url))
+    (let* ((url (replace-regexp-in-string "^file://" (concat "http://" osc-http-addr) url))
+           (osc-string (concat "\e]52;" (if _new-window "y" "x") ";" (base64-encode-string (encode-coding-string url 'utf-8) t) "\07"))
+           (escaped (if (string-match "tmux" (concat "" (getenv "TMUX"))) (concat "\033Ptmux;\033" osc-string "\033\\") osc-string)))
+      (send-string-to-terminal escaped))))
 
 (provide 'osc)
+
+;;; osc.el ends here
