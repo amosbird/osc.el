@@ -2,7 +2,10 @@
 ;; Package-Version: 20171009.2225
 ;;; Commentary:
 ;;; Code:
-(defvar osc-http-addr "172.26.165.60:8866")
+(defcustom osc-http-addr "172.26.165.60:8866"
+  "Non-nil means automatically save place in each file..."
+  :type 'string
+  :group 'osc)
 
 (defun osc-navigate (direction)
   (let ((cmd (concat "windmove-" direction)))
@@ -85,13 +88,11 @@
 ;;;###autoload
 (defun browse-url-osc (url &optional _new-window)
   (interactive (browse-url-interactive-arg "URL: "))
-  (if (display-graphic-p)
-      (browse-url-chrome url _new-window)
-    (setq url (browse-url-encode-url url))
-    (let* ((url (replace-regexp-in-string "^file://" (concat "http://" osc-http-addr) url))
-           (osc-string (concat "\e]52;" (if _new-window "y" "x") ";" (base64-encode-string (encode-coding-string url 'utf-8) t) "\07"))
-           (escaped (if (string-match "tmux" (concat "" (getenv "TMUX"))) (concat "\033Ptmux;\033" osc-string "\033\\") osc-string)))
-      (send-string-to-terminal escaped))))
+  (setq url (browse-url-encode-url url))
+  (let* ((url (replace-regexp-in-string "^file://" (concat "http://" osc-http-addr) url))
+         (osc-string (concat "\e]52;" (if _new-window "y" "x") ";" (base64-encode-string (encode-coding-string url 'utf-8) t) "\07"))
+         (escaped (if (string-match "tmux" (concat "" (getenv "TMUX"))) (concat "\033Ptmux;\033" osc-string "\033\\") osc-string)))
+    (send-string-to-terminal escaped)))
 
 (provide 'osc)
 
