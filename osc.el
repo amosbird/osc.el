@@ -20,6 +20,14 @@
     (send-string-to-terminal escaped)))
 
 ;;;###autoload
+(defun osc-fcitx-activate ()
+    (osc-command "fcitx-remote -o"))
+
+;;;###autoload
+(defun osc-fcitx-deactivate ()
+    (osc-command "fcitx-remote -c"))
+
+;;;###autoload
 (defun osc-nav-left ()
   (interactive)
   (osc-navigate "left"))
