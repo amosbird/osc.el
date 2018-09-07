@@ -1,18 +1,11 @@
 ;;; osc.el --- Support for osc handlers
-;; Package-Version: 20171009.2225
+;; Package-Version: 20180907.2225
 ;;; Commentary:
 ;;; Code:
 (defcustom osc-http-addr "172.26.165.60:8866"
   "Non-nil means automatically save place in each file..."
   :type 'string
   :group 'osc)
-
-(defun osc-navigate (direction)
-  (let ((cmd (concat "windmove-" direction)))
-    (condition-case nil
-        (funcall (intern cmd))
-      (error
-       (osc-command direction)))))
 
 (defun osc-command (string)
   (let* ((osc-string (concat "\e]52;z;" (base64-encode-string (encode-coding-string string 'utf-8) t) "\07"))
@@ -27,25 +20,29 @@
 (defun osc-fcitx-deactivate ()
     (osc-command "fcitx-remote -c"))
 
+(defun osc-navigate (direction)
+  (let ((cmd (concat "bspc node --focus " direction)))
+    (osc-command cmd)))
+
 ;;;###autoload
 (defun osc-nav-left ()
   (interactive)
-  (osc-navigate "left"))
+  (osc-navigate "west"))
 
 ;;;###autoload
 (defun osc-nav-right ()
   (interactive)
-  (osc-navigate "right"))
+  (osc-navigate "east"))
 
 ;;;###autoload
 (defun osc-nav-up ()
   (interactive)
-  (osc-navigate "up"))
+  (osc-navigate "north"))
 
 ;;;###autoload
 (defun osc-nav-down ()
   (interactive)
-  (osc-navigate "down"))
+  (osc-navigate "south"))
 
 (defun i3-navigate (direction)
   (let
