@@ -20,9 +20,9 @@
 (defun osc-fcitx-deactivate ()
     (osc-command "fcitx-remote -c"))
 
+;;;###autoload
 (defun osc-navigate (direction)
-  (let ((cmd (concat "bspc node --focus " direction)))
-    (osc-command cmd)))
+  (osc-command "bspc node -f next.local"))
 
 ;;;###autoload
 (defun osc-nav-left ()
